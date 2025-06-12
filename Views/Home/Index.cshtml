@@ -1,0 +1,71 @@
+﻿@using MVC_Project.Model
+@using MVC_Project.Models
+
+@model IEnumerable<MVC_Project.Model.CarListing>
+@{
+    ViewData["Title"] = "Friberg Car Rentals";
+}
+
+<div class="text-center">
+    <img src="https://i.postimg.cc/Hnb3Dkhh/Screenshot-2025-06-10-202240.png" alt="Friberg Car Rentals Logo" width="500" height="500" />
+    <h1 class="display-4">Welcome to Friberg Car Rentals</h1>
+    <h2>We have the car - you have the money</h2>
+    <br />
+    <br />
+    <h4>See all of our current cars below.</h4>
+</div>
+
+<h1>Index</h1>
+
+<p>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <a asp-action="Create">Create New</a>
+    }
+
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Make
+            </th>
+            <th>
+                Model
+            </th>
+            <th>
+                Availability
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.Make
+                </td>
+                <td>
+                    @item.Model
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.isAvailable)
+                </td>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <td>
+                        <a asp-controller="CarListings" asp-action ="Edit" asp-route-id="@item.CarId">Edit</a> |
+                        <a asp-controller="CarListings" asp-action="Details" asp-route-id="@item.CarId">Details</a> |
+                        <a asp-controller="CarListings" asp-action="Delete" asp-route-id="@item.CarId">Delete</a>
+                </td>
+                } else {
+                    <td>
+                        <a asp-controller="CarListings" asp-action="Details" asp-route-id="@item.CarId">Details</a>
+                        <a asp-controller="Bookings" asp-action="Create" asp-route-id="@item.CarId">Book</a>
+                </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
