@@ -18,9 +18,9 @@
 <h1>Index</h1>
 
 <p>
-    @if (User.Identity.IsAuthenticated)
+    @if (User.IsInRole("Admin"))
     {
-        <a asp-action="Create">Create New</a>
+        <a asp-controller="CarListings" asp-action="Create">Create New Listing</a>
     }
 
 </p>
@@ -52,7 +52,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.isAvailable)
                 </td>
-                @if (User.Identity.IsAuthenticated)
+                @if (User.IsInRole("Admin"))
                 {
                     <td>
                         <a asp-controller="CarListings" asp-action ="Edit" asp-route-id="@item.CarId">Edit</a> |

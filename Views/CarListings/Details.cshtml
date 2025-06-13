@@ -1,4 +1,4 @@
-﻿@model MVC_Project.Model.CarListing
+﻿@model MVC_Project.Models.CarListingViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -14,13 +14,13 @@
             @Html.DisplayNameFor(model => model.Make)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Make)
+            @Model.Make
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Model)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Model)
+            @Model.Model
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.isAvailable)

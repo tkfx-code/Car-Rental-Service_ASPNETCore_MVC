@@ -9,6 +9,8 @@ namespace MVC_Project.Data
         public MappingProfile()
         {
             CreateMap<CustomerViewModel,Customer>().ReverseMap();
+            CreateMap<CarListing, CarListingViewModel>().ReverseMap();
+            CreateMap<Booking, BookingViewModel>().ReverseMap();
         }
     }
 }

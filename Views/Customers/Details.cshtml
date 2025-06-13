@@ -1,8 +1,10 @@
-﻿@model MVC_Project.Models.CustomerViewModel
+﻿@using Microsoft.AspNetCore.Identity
+@model MVC_Project.Models.CustomerViewModel
 
 @{
     ViewData["Title"] = "Details";
 }
+
 
 <h1>Details</h1>
 
@@ -35,8 +37,10 @@
             @Html.DisplayFor(model => model.PhoneNumber)
         </dd>
     </dl>
+    <h4>Bookings</h4>
+	<hr />
+	@* @Viewbag method here and show the booking details list here bind to customerid? *@
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.CustomerId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.CustomerId">Edit</a> 
 </div>

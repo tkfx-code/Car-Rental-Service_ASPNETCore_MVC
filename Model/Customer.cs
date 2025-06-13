@@ -10,14 +10,13 @@ namespace MVC_Project.Model
         public string FirstName { get; set; } = "";
         [Required(ErrorMessage = "Last Name is required")]
         public string LastName { get; set; } = "";
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid Email Address")]
+        [Required]
         public string Email { get; set; } = "";
-        [Required(ErrorMessage = "Phone Number is required")]
+
         [MinLength(10, ErrorMessage = "Phone Number must be at least 10 digits")]
         public int PhoneNumber { get; set; }
 
-        //Create virtual list for bookings that can store customer info 
-        public virtual List<CustomerViewModel> Customers { get; set; }
+        //One to many : One customer can have many bookings
+        public virtual List<Booking> Bookings { get; set; }
     }
 }

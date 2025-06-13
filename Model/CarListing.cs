@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MVC_Project.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MVC_Project.Model
 {
@@ -9,8 +9,11 @@ namespace MVC_Project.Model
         public int CarId { get; set; }
         public string Make { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;
+        [NotMapped]
+        public IFormFile? Picture { get; set; }
         public bool isAvailable { get; set; } = true;
 
-        public List<CarListingViewModel> CarListings { get; set; }
+        //One to many: One car can get booked several times
+        public List<Booking> Bookings { get; set; }
     }
 }

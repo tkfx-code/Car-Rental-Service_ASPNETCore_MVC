@@ -27,26 +27,17 @@ namespace MVC_Project.Controllers
         }
 
         // GET: Customers
-        //AUTHORIZATION : Only admins can see list of customers - show all info
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            //foreach (Customer c in _context.Customers)
-            //{
-            //    var customerVM = new CustomerViewModel();
-            //    customerVM.CustomerId = c.CustomerId;
-            //    customerVM.FirstName = c.FirstName;
-            //    customerVM.LastName = c.LastName;
-            //    customerVM.Email = c.Email;
-            //    customerVM.PhoneNumber = c.PhoneNumber;
-            //    customerViewModels.Add(customerVM);
-            //}
+            
             var customers = await _context.Customers.ToListAsync();
             customerViewModels = _mapper.Map<List<CustomerViewModel>>(customers);
             return View(customerViewModels);
         }
 
         // GET: Customers/Details/5
-        //AUTHORIZATION : Only logged in users should be able to view THEIR customer details + Admins
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -54,14 +45,10 @@ namespace MVC_Project.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers.Include(c => c.Customers)
+            var customer = await _context.Customers.Include(c => c.Bookings)
                 .FirstOrDefaultAsync(m => m.CustomerId == id);
             var customerViewModel = _mapper.Map<CustomerViewModel>(customer);
-            //customerViewModel.CustomerId = customer.CustomerId;
-            //customerViewModel.FirstName = customer.FirstName;
-            //customerViewModel.LastName = customer.LastName;
-            //customerViewModel.Email = customer.Email;
-            //customerViewModel.PhoneNumber = customer.PhoneNumber;
+           
 
             if (customerViewModel == null)
             {
@@ -70,6 +57,39 @@ namespace MVC_Project.Controllers
 
             return View(customerViewModel);
         }
+
+        [Authorize]
+        //See current users profile
+        public async Task<IActionResult> Profile()
+        {
+            //Use .Name since ASPNETCORE uses email as log in credentials
+            var userEmail = User.Identity?.Name;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            var customer = await _context.Customers
+                .Include(c=>c.Bookings)
+                .ThenInclude(b => b.Car) 
+                .FirstOrDefaultAsync(c => c.Email == userEmail);
+
+            if(customer == null)
+            {
+                return NotFound();
+            }
+
+            var customerVM = _mapper.Map<CustomerViewModel>(customer);
+            var bookingsVM = _mapper.Map<List<BookingViewModel>>(customer.Bookings);
+            
+            var profileVM = new ProfileViewModel
+            {
+                Customer = customerVM,
+                Bookings = bookingsVM
+            };
+
+            return View(profileVM);
+        }
+
 
         // GET: Customers/Create
         //ADMINS CAN CREATE USERS
@@ -87,11 +107,9 @@ namespace MVC_Project.Controllers
         {
             if (ModelState.IsValid)
             {
-                var customer = new Customer();
-                customer.CustomerId = customerViewModel.CustomerId;
-                customer.FirstName = customerViewModel.FirstName;
-                customer.LastName = customerViewModel.LastName;
+                var customer = _mapper.Map<Customer>(customerViewModel);
                 _context.Add(customer);
+               
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -100,6 +118,7 @@ namespace MVC_Project.Controllers
 
         // GET: Customers/Edit/5
         //AUTHORIZATION: Only admins and the own customer should be able to edit customer details
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -109,12 +128,7 @@ namespace MVC_Project.Controllers
 
             var customer = await _context.Customers.FirstOrDefaultAsync(m => m.CustomerId == id);
             var customerViewModel = _mapper.Map<CustomerViewModel>(customer);
-            //var customerViewModel = new CustomerViewModel();
-            //customerViewModel.CustomerId = customer.CustomerId;
-            //customerViewModel.FirstName = customer.FirstName;
-            //customerViewModel.LastName = customer.LastName;
-            //customerViewModel.Email = customer.Email;
-            //customerViewModel.PhoneNumber = customer.PhoneNumber;
+            
 
             if (customer == null)
             {
@@ -128,6 +142,7 @@ namespace MVC_Project.Controllers
         //SHOW CONFIRMATION MESSAGE AFTER EDITING
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Edit(int id, [Bind("CustomerId,FirstName,LastName,Email,PhoneNumber")] CustomerViewModel customerViewModel)
         {
             if (id != customerViewModel.CustomerId)
@@ -139,13 +154,6 @@ namespace MVC_Project.Controllers
             {
                 try
                 {
-                    //var customer = await _context.Customers.FirstOrDefaultAsync(m => m.Id == id);
-                    //customer.FirstName = customerViewModel.FirstName;
-                    //customer.LastName = customerViewModel.LastName;
-                    //customer.Email = customerViewModel.Email;
-                    //customer.PhoneNumber = customerViewModel.PhoneNumber;
-                    //_context.Update(customer);
-
                     var customer = await _context.Customers.FindAsync(id);
                     _mapper.Map(customerViewModel, customer);
                     _context.Update(customer);
@@ -168,8 +176,8 @@ namespace MVC_Project.Controllers
         }
 
         // GET: Customers/Delete/5
-        //AUTHORIZATION: Only admins should be able to delete customers
         // SHOW CONFIRMATION MESSAGE BEFORE DELETING
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -180,12 +188,6 @@ namespace MVC_Project.Controllers
             var customer = await _context.Customers
                 .FirstOrDefaultAsync(m => m.CustomerId == id);
             var customerViewModel = _mapper.Map<CustomerViewModel>(customer);
-            //var customerViewModel = new CustomerViewModel();
-            //customerViewModel.Id = custoner.Id;
-            //customerViewModel.LastName = customer.LastName;
-            //customerViewModel.FirstName = customer.FirstName;
-            //customerViewModel.Email = customer.Email;
-            //customerViewModel.PhoneNumber = customer.PhoneNumber;
 
             if (customerViewModel == null)
             {
@@ -200,15 +202,16 @@ namespace MVC_Project.Controllers
         // SHOW CONFIRMATION MESSAGE AFTER DELETING
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var customer = await _context.Customers.FindAsync(id);
             if (customer != null)
             {
                 _context.Customers.Remove(customer);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Profile deleted successfully."; // Confirmation message after deletion
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

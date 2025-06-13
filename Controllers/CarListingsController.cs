@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -15,18 +17,22 @@ namespace MVC_Project.Controllers
     {
         
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public CarListingsController(ApplicationDbContext context)
+        public CarListingsController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: CarListings
         // Fetch List of all Car Listings
-        
+
         public async Task<IActionResult> Index()
         {
-            return View(await _context.CarListings.ToListAsync());
+            var cars = await _context.CarListings.ToListAsync();
+            var carListingViewModels = _mapper.Map<List<CarListingViewModel>>(cars);
+            return View(carListingViewModels);
         }
 
         // GET: CarListings/Details/5
@@ -37,18 +43,20 @@ namespace MVC_Project.Controllers
                 return NotFound();
             }
 
-            var carListingViewModel = await _context.CarListings
+            var car = await _context.CarListings
                 .FirstOrDefaultAsync(m => m.CarId == id);
-            if (carListingViewModel == null)
+            if (car == null)
             {
                 return NotFound();
             }
 
+            var carListingViewModel = _mapper.Map<CarListingViewModel>(car);
             return View(carListingViewModel);
         }
 
         // GET: CarListings/Create
         //AUTHORIZATION: Only admins should be able to create new car listings
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
@@ -58,12 +66,17 @@ namespace MVC_Project.Controllers
         //AUTHORIZATION : Only admins should be able to create new car listings
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("CarId,Make,Model,isAvailable")] CarListingViewModel carListingViewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(carListingViewModel);
+                var car = _mapper.Map<CarListing>(carListingViewModel);
+
+                _context.Add(car);
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Listing created successfully."; // Confirmation message after creation
                 return RedirectToAction(nameof(Index));
             }
             return View(carListingViewModel);
@@ -71,6 +84,7 @@ namespace MVC_Project.Controllers
 
         // GET: CarListings/Edit/5
         //AUTHORIZATION: Only admins should be able to edit car listings
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -78,11 +92,12 @@ namespace MVC_Project.Controllers
                 return NotFound();
             }
 
-            var carListingViewModel = await _context.CarListings.FindAsync(id);
-            if (carListingViewModel == null)
+            var car = await _context.CarListings.FindAsync(id);
+            if (car == null)
             {
                 return NotFound();
             }
+            var carListingViewModel = _mapper.Map<CarListingViewModel>(car);
             return View(carListingViewModel);
         }
 
@@ -90,6 +105,7 @@ namespace MVC_Project.Controllers
         //AUTHORIZATION: Only admins should be able to edit car listings
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("CarId,Make,Model,isAvailable")] CarListingViewModel carListingViewModel)
         {
             if (id != carListingViewModel.CarId)
@@ -97,16 +113,26 @@ namespace MVC_Project.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
+                return View(carListingViewModel);
+            }
+            var car = await _context.CarListings.FindAsync(id);
+            if (car == null)
+            {
+                return NotFound();
+            }
+            
+            _mapper.Map(carListingViewModel, car);
+            try
                 {
-                    _context.Update(carListingViewModel);
-                    await _context.SaveChangesAsync();
-                }
+                _context.Update(car);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Listing updated successfully."; // Confirmation message after update
+            }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CarListingExists(carListingViewModel.CarId))
+                    if (!CarListingExists(car.CarId))
                     {
                         return NotFound();
                     }
@@ -117,11 +143,10 @@ namespace MVC_Project.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(carListingViewModel);
-        }
 
         // GET: CarListings/Delete/5
         //AUTHORIZATION: Only admins should be able to delete car listings
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -129,13 +154,13 @@ namespace MVC_Project.Controllers
                 return NotFound();
             }
 
-            var carListingViewModel = await _context.CarListings
+            var car = await _context.CarListings
                 .FirstOrDefaultAsync(m => m.CarId == id);
-            if (carListingViewModel == null)
+            if (car == null)
             {
                 return NotFound();
             }
-
+            var carListingViewModel = _mapper.Map<CarListingViewModel>(car);
             return View(carListingViewModel);
         }
 
@@ -143,15 +168,17 @@ namespace MVC_Project.Controllers
         //AUTHORIZATION: Only admins should be able to delete car listings
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var carListingViewModel = await _context.CarListings.FindAsync(id);
-            if (carListingViewModel != null)
+            var car = await _context.CarListings.FindAsync(id);
+            if (car != null)
             {
-                _context.CarListings.Remove(carListingViewModel);
+                _context.CarListings.Remove(car);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Listing deleted successfully."; // Confirmation message after deletion
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

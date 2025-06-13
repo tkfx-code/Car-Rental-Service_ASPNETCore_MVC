@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using MVC_Project.Data;
 using MVC_Project.Model;
 using MVC_Project.Models;
+using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 
 
 namespace MVC_Project.Controllers
@@ -15,15 +17,18 @@ namespace MVC_Project.Controllers
     public class BookingsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public BookingsController(ApplicationDbContext context)
+        public BookingsController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: Bookings
         //Fetch List of all Bookings
         //AUTHORIZATION: Only logged in ADMINS should be able to view all bookings
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Bookings.ToListAsync());
@@ -31,7 +36,7 @@ namespace MVC_Project.Controllers
 
         // GET: Bookings/Details/5
         // Fetch Details of a specific Booking by BookingID
-        //AUTHORIZATION: Only logged in users should be able to view booking details 
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -39,23 +44,24 @@ namespace MVC_Project.Controllers
                 return NotFound();
             }
 
-            var bookingViewModel = await _context.Bookings
+            var booking = await _context.Bookings
+                .Include(b => b.Car) // Include Car details in the booking
+                .Include(b => b.Customer) // Include Customer details in the booking
                 .FirstOrDefaultAsync(m => m.BookingId == id);
-            if (bookingViewModel == null)
+            if (booking == null)
             {
                 return NotFound();
             }
-
+            var bookingViewModel = _mapper.Map<BookingViewModel>(booking);
             return View(bookingViewModel);
         }
 
         // GET: Bookings/Create
-        // Display the Create Booking form - with dropdown menu of all the cars(?)
         //CREATE SHOULD ALWAYS BE CONNECTED TO SPECIFIC CAR LISTING WHEN CLICKING BOOK
-        //AUTHORIZATION: Only logged in users should be able to create bookings 
+        [Authorize]
         public IActionResult Create()
         {
-            ViewBag.Customers = new SelectList(_context.CarListings, "CarId", "Make", "Model"); 
+            ViewBag.Cars = new SelectList(_context.CarListings, "CarId", "Make", "Model"); 
             return View();
         }
 
@@ -64,14 +70,34 @@ namespace MVC_Project.Controllers
         //CONFIRMATION MESSAGE WHEN BOOKING IS SUCCESSFUL
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CarId,BookingId,StartDate,EndDate,TotalPrice")] BookingViewModel bookingViewModel)
+        [Authorize]
+        public async Task<IActionResult> Create([Bind("CarId,BookingId,StartDate,EndDate")] BookingViewModel bookingViewModel)
         {
-            Customer customer = _context.Customers.Find(bookingViewModel.BookingId); //unsure if fetching/binding the correct data?
-            bookingViewModel.Customer = customer;
+            //Get currenty logged in user's CustomerID
+            var userEmail = User.Identity?.Name;
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == userEmail);
+            if (customer == null)
+            {
+                return NotFound("Customer not found.");
+            }
+
+            var car = await _context.CarListings.FindAsync(bookingViewModel.CarId);
+            if (car == null)
+            {
+                return NotFound("Car not found.");
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(bookingViewModel);
+                //map viewmodel to booking domain model
+                var booking = _mapper.Map<Booking>(bookingViewModel);
+                booking.CustomerId = customer.CustomerId;
+                booking.Car = car;
+
+                _context.Add(booking);
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Booking created successfully."; // Confirmation message after booking
                 return RedirectToAction(nameof(Index));
             }
             return View(bookingViewModel);
@@ -80,6 +106,7 @@ namespace MVC_Project.Controllers
         // GET: Bookings/Edit/5
         // Fetch the Booking to be edited by BookingID
         //AUTHORIZATION: Only logged in users should be able to edit bookings OR admins
+        [Authorize(Roles ="Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -87,54 +114,73 @@ namespace MVC_Project.Controllers
                 return NotFound();
             }
 
-            var bookingViewModel = await _context.Bookings.FindAsync(id);
-            if (bookingViewModel == null)
+            var booking = await _context.Bookings
+                .Include(b=>b.Car)
+                .Include(b => b.Customer)
+                .FirstOrDefaultAsync(b => b.BookingId == id);
+
+            if (booking == null)
             {
                 return NotFound();
             }
+            var bookingViewModel = _mapper.Map<BookingViewModel>(booking);
             return View(bookingViewModel);
         }
 
         // POST: Bookings/Edit/5
         // When editing, ensure the BookingId matches the one in the model and return to Index if successful
         //ADD CONFIRMATION MESSAGE
-        //AUTHORIZATION: Only logged in users should be able to edit bookings OR admins
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("BookingId,StartDate,EndDate,TotalPrice")] BookingViewModel bookingViewModel)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id, [Bind("BookingId,StartDate,EndDate")] BookingViewModel bookingViewModel)
         {
             if (id != bookingViewModel.BookingId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(bookingViewModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BookingExists(bookingViewModel.BookingId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return View(bookingViewModel);
             }
-            return View(bookingViewModel);
+
+            var booking = await _context.Bookings
+                .Include(b=>b.Car)
+                .FirstOrDefaultAsync(b => b.BookingId == id);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            _mapper.Map(bookingViewModel, booking);
+            booking.Car = await _context.CarListings.FindAsync(bookingViewModel.CarId);
+            try
+            {
+                _context.Update(booking);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BookingExists(bookingViewModel.BookingId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            TempData["SuccessMessage"] = "Booking updated successfully."; // Confirmation message after editing
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Bookings/Delete/5
         // Fetch the Booking to be deleted by BookingID
         //AUTHORIZATION : Only logged in users should be able to delete bookings OR admins
         //SHOW CONFIRMATION MESSAGE BEFORE DELETING
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -142,31 +188,36 @@ namespace MVC_Project.Controllers
                 return NotFound();
             }
 
-            var bookingViewModel = await _context.Bookings
+            var booking = await _context.Bookings
+                .Include(b => b.Car) // Include Car details in the booking
+                .Include(b => b.Customer) // Include Customer details in the booking
                 .FirstOrDefaultAsync(m => m.BookingId == id);
-            if (bookingViewModel == null)
+            if (booking == null)
             {
                 return NotFound();
             }
-
+            var bookingViewModel = _mapper.Map<BookingViewModel>(booking);
             return View(bookingViewModel);
         }
 
         // POST: Bookings/Delete/5
         // Deletes the Booking by BookingID
         //AUTHORIZATION: Only logged in users should be able to delete bookings OR admins
-        //SHOW CONFIRMATION MESSAGE AFTER DELETING
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var bookingViewModel = await _context.Bookings.FindAsync(id);
-            if (bookingViewModel != null)
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking == null)
             {
-                _context.Bookings.Remove(bookingViewModel);
+                return NotFound();
             }
 
+            _context.Bookings.Remove(booking);
             await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Booking deleted successfully."; // Confirmation message after deletion
             return RedirectToAction(nameof(Index));
         }
 
