@@ -76,3 +76,9 @@
 	<p>You do not have permission to view this page.</p>
 	}
 </p>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+}

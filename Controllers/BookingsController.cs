@@ -67,7 +67,6 @@ namespace MVC_Project.Controllers
 
         // POST: Bookings/Create
         //Bind CarId and BookingId to the bookingViewModel, CustomerID should already be bound due to log in
-        //CONFIRMATION MESSAGE WHEN BOOKING IS SUCCESSFUL
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -105,7 +104,6 @@ namespace MVC_Project.Controllers
 
         // GET: Bookings/Edit/5
         // Fetch the Booking to be edited by BookingID
-        //AUTHORIZATION: Only logged in users should be able to edit bookings OR admins
         [Authorize(Roles ="Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
