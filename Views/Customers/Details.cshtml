@@ -37,10 +37,10 @@
             @Html.DisplayFor(model => model.PhoneNumber)
         </dd>
     </dl>
-    <h4>Bookings</h4>
+    <h4>Customer Bookings</h4>
 	<hr />
-	@* @Viewbag method here and show the booking details list here bind to customerid? *@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.CustomerId">Edit</a> 
+    <a asp-action="Index">Back To List</a>
 </div>

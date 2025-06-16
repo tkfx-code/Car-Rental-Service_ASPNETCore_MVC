@@ -11,9 +11,8 @@
         <a asp-action="Create">Create New</a>
     
 
-    <h1>Create</h1>
+    <h1>Create Car Listing</h1>
 
-    <h4>CarListing</h4>
     <hr />
     <div class="row">
         <div class="col-md-4">
@@ -34,11 +33,13 @@
                     <textarea asp-for="PicturesRaw" class="form-control" rows="5"></textarea>
                     <span asp-validation-for="PicturesRaw" class="text-danger"></span>
                 </div>
+                <br />
                 <div class="form-group form-check">
                     <label class="form-check-label">
                         <input class="form-check-input" asp-for="isAvailable" /> @Html.DisplayNameFor(model => model.isAvailable)
                     </label>
                 </div>
+                <br />
                 <div class="form-group">
                     <input type="submit" value="Create" class="btn btn-primary" />
                 </div>

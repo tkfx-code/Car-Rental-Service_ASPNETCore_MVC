@@ -98,7 +98,7 @@ namespace MVC_Project.Controllers
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Booking created successfully."; // Confirmation message after booking
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Home");
             }
             return View(bookingViewModel);
         }

@@ -149,25 +149,25 @@ namespace MVC_Project.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        if (!await _userManager.IsInRoleAsync(user, "Admin"))
+                    //keep new registered user signed in
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                        
+                    var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                    var customer = new Customer
                         {
-                            var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
-                            var customer = new Customer
-                            {
-                                Email = user.Email,
-                                FirstName = Input.FirstName,
-                                LastName = Input.LastName,
-                                PhoneNumber = 0, //Default is 0, can be updated later
-                                UserId = user.Id //Links to Identity
-                            };
+                        Email = user.Email,
+                        FirstName = Input.FirstName,
+                        LastName = Input.LastName,
+                        PhoneNumber = 0, //Default is 0, can be updated later
+                        UserId = user.Id //Links to Identity
+                        };
 
-                            dbContext.Customers.Add(customer);
-                            await dbContext.SaveChangesAsync();
+                        dbContext.Customers.Add(customer);
+                        await dbContext.SaveChangesAsync();
 
-                            return LocalRedirect(returnUrl);
-                        }
+                        return LocalRedirect(returnUrl);
                     }
+
                     foreach (var error in result.Errors)
                     {
                         ModelState.AddModelError(string.Empty, error.Description);

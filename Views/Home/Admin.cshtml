@@ -1,9 +1,4 @@
 ﻿@*
-    /Admin view
-    This view is only accessible to users in admin role
-    There should be a button for:
-    Create Customer, Create Listing button, View Cars
-    There should be a list of all customers and car listings underneath
 *@
 
 @using Microsoft.AspNetCore.Identity
@@ -11,4 +6,73 @@
 @model MVC_Project.Models.AdminViewModel
 
 @{
+
 }
+<h1>Admin Dashboard</h1>
+<p>
+    @if (User.IsInRole("Admin"))
+    {
+		<a asp-controller="CarListings" asp-action="Create" class="btn btn-primary m-1">Create New Listing</a>
+		<a asp-controller="Customers" asp-action="Create" class="btn btn-primary m-1">Create New Customer</a>
+
+        <a asp-controller="CarListings" asp-action="Index" class="btn btn-primary m-1">View Cars</a>
+	<h2>Our Customers</h2>
+    <table class="table">
+        <thead>
+			<tr>
+				<th>Customer ID</th>
+				<th>First Name</th>
+				<th>Last Name</th>
+				<th>Email</th>
+				<th>Phone Number</th>
+			</tr>
+		</thead>
+		<tbody>
+				@foreach (var customer in Model.Customers)
+				{
+				<tr>
+					<td>@customer.CustomerId</td>
+					<td>@customer.FirstName</td>
+					<td>@customer.LastName</td>
+					<td>@customer.Email</td>
+					<td>@customer.PhoneNumber</td>
+						<td>
+							<a asp-controller="Customers" asp-action="Edit" asp-route-id="@customer.CustomerId">Edit</a> |
+							<a asp-controller="Customers" asp-action="Delete" asp-route-id="@customer.CustomerId">Delete</a>
+						</td>
+				</tr>
+				}
+		</tbody>
+	</table>
+		<h2>Our Bookings</h2>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Booking ID</th>
+					<th>First Name</th>
+					<th>Last Name</th>
+					<th>Email</th>
+					<th>Phone Number</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var booking in Model.Bookings)
+				{
+					<tr>
+						<td>@booking.BookingId</td>
+						<td>@booking.Car</td>
+						<td>@booking.Customer</td>
+						<td>@booking.StartDate</td>
+						<td>@booking.EndDate</td>
+						<td>
+							<a asp-controller="Bookings" asp-action="Edit" asp-route-id="@booking.BookingId">Edit</a> |
+							<a asp-controller="Bookings" asp-action="Delete" asp-route-id="@booking.BookingId">Delete</a>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+    } else {
+	<p>You do not have permission to view this page.</p>
+	}
+</p>
