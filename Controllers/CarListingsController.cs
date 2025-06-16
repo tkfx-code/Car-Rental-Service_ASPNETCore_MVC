@@ -107,6 +107,8 @@ namespace MVC_Project.Controllers
                 return NotFound();
             }
             var carListingViewModel = _mapper.Map<CarListingViewModel>(car);
+            // Convert the list of pictures to a raw string for editing, so we dont have to re-add the images on edit
+            carListingViewModel.PicturesRaw = string.Join(Environment.NewLine, carListingViewModel.Pictures ?? new List<string>());
             return View(carListingViewModel);
         }
 

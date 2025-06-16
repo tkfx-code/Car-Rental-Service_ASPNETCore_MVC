@@ -59,6 +59,7 @@ namespace MVC_Project.Controllers
         }
 
         [Authorize]
+        // GET: Customers/Profile
         //See current users profile
         public async Task<IActionResult> Profile()
         {
@@ -68,14 +69,23 @@ namespace MVC_Project.Controllers
             {
                 return RedirectToAction("Login", "Account");
             }
+
+            if (User.IsInRole("Admin"))
+            {
+                // If the user is an admin, redirect to the admin index
+                return RedirectToAction("Index", "Admin");
+            }
+
             var customer = await _context.Customers
                 .Include(c=>c.Bookings)
                 .ThenInclude(b => b.Car) 
                 .FirstOrDefaultAsync(c => c.Email == userEmail);
 
-            if(customer == null)
+            if (customer == null)
             {
-                return NotFound();
+                // For debugging: show message
+                TempData["ErrorMessage"] = "There is no customer profile to show.";
+                return RedirectToAction("Index", "Home");
             }
 
             var customerVM = _mapper.Map<CustomerViewModel>(customer);

@@ -15,6 +15,7 @@ namespace MVC_Project.Model
 
         [MinLength(10, ErrorMessage = "Phone Number must be at least 10 digits")]
         public int PhoneNumber { get; set; }
+        public string? UserId { get; set; } //Foreign key to IdentityUser
 
         //One to many : One customer can have many bookings
         public virtual List<Booking> Bookings { get; set; }
