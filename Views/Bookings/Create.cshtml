@@ -22,15 +22,16 @@
                     <dd class="col-sm-10">
                         @Html.DisplayFor(model => model.Car)
                     </dd>
-                <dt class="col-sm-2">
-                    Start Date
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.StartDate)
-                </dd>
-                <dt class="col-sm-2">
-                    End Date
-                </dt>
+                <div class="form-group">
+                    <label asp-for="StartDate" class="control-label"></label>
+                    <input asp-for="StartDate" type="date" class="form-control" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="EndDate" class="control-label"></label>
+                    <input asp-for="EndDate" type="date" class="form-control" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
                 <dd class="col-sm-10">
                     @Html.DisplayFor(model => model.EndDate)
                 </dd>

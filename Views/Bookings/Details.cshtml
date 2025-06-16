@@ -16,13 +16,13 @@
                 @Html.DisplayNameFor(model => model.StartDate)
             </dt>
             <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.StartDate)
+                @Model.StartDate.ToString("yyyy-MM-dd")
             </dd>
             <dt class = "col-sm-2">
                 @Html.DisplayNameFor(model => model.EndDate)
             </dt>
             <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.EndDate)
+                @Model.EndDate.ToString("yyyy-MM-dd")
             </dd>
         </dl>
     </div>
