@@ -67,10 +67,19 @@ namespace MVC_Project.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([Bind("CarId,Make,Model,isAvailable")] CarListingViewModel carListingViewModel)
+        public async Task<IActionResult> Create([Bind("CarId,Make,Model, PicturesRaw, isAvailable")] CarListingViewModel carListingViewModel)
         {
             if (ModelState.IsValid)
             {
+                if (!string.IsNullOrEmpty(carListingViewModel.PicturesRaw))
+                {
+                    // Split the raw input into a list of picture URLs
+                    carListingViewModel.Pictures = carListingViewModel.PicturesRaw
+                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(p => p.Trim())
+                        .ToList();
+                }
+
                 var car = _mapper.Map<CarListing>(carListingViewModel);
 
                 _context.Add(car);
@@ -106,7 +115,7 @@ namespace MVC_Project.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("CarId,Make,Model,isAvailable")] CarListingViewModel carListingViewModel)
+        public async Task<IActionResult> Edit(int id, [Bind("CarId,Make,Model, PicturesRaw, isAvailable")] CarListingViewModel carListingViewModel)
         {
             if (id != carListingViewModel.CarId)
             {
@@ -117,6 +126,16 @@ namespace MVC_Project.Controllers
             {
                 return View(carListingViewModel);
             }
+
+            if (!string.IsNullOrEmpty(carListingViewModel.PicturesRaw))
+            {
+                // Split the raw input into a list of picture URLs
+                carListingViewModel.Pictures = carListingViewModel.PicturesRaw
+                    .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => p.Trim())
+                    .ToList();
+            }
+
             var car = await _context.CarListings.FindAsync(id);
             if (car == null)
             {

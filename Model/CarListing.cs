@@ -9,8 +9,8 @@ namespace MVC_Project.Model
         public int CarId { get; set; }
         public string Make { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;
-        [NotMapped]
-        public IFormFile? Picture { get; set; }
+        [Required]
+        public List<string> Pictures { get; set; } = new List<string>();
         public bool isAvailable { get; set; } = true;
 
         //One to many: One car can get booked several times

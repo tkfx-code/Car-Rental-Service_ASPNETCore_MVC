@@ -13,21 +13,29 @@
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Make)
         </dt>
-        <dd class = "col-sm-10">
-            @Model.Make
-        </dd>
+        <td>
+            @Html.DisplayFor(model => model.Make)
+        </td>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Model)
         </dt>
-        <dd class = "col-sm-10">
-            @Model.Model
-        </dd>
+        <td>
+            @Html.DisplayFor(model => model.Model)
+        </td>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.isAvailable)
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.isAvailable)
         </dd>
+		@foreach (var picture in Model.Pictures)
+		{
+			<dt class="col-sm-2">
+			</dt>
+			<dd class="col-sm-10">
+				<img src="@picture" alt="Car Picture" style="max-width: 200px; max-height: 200px;" />
+			</dd>
+		}
     </dl>
 </div>
 <div>

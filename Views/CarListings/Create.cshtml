@@ -29,11 +29,11 @@
                     <input asp-for="Model" class="form-control" />
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>
-               @*  <div class="form-group">
-                    <label asp-for="Picture" class="control-label"></label>
-                    <input asp-for="Picture" accept="image/*" />
-                    <span asp-validation-for="Picture" class="text-danger"></span>
-                </div> *@
+                <div class="form-group">
+                    <label asp-for="PicturesRaw" class="control-label">Pictures by URL (one per line)</label>
+                    <textarea asp-for="PicturesRaw" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="PicturesRaw" class="text-danger"></span>
+                </div>
                 <div class="form-group form-check">
                     <label class="form-check-label">
                         <input class="form-check-input" asp-for="isAvailable" /> @Html.DisplayNameFor(model => model.isAvailable)
