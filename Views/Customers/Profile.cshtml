@@ -28,6 +28,7 @@
 		</tr>
 	</table>
 	<a asp-action="Edit" asp-route-id="@Model.Customer.CustomerId">Edit Profile</a>
+	<br />
 
 <h3> My Bookings </h3>
 
@@ -51,7 +52,7 @@
 			{
 				<tr>
 					<td>@booking.BookingId</td>
-					<td>@booking.Car?.Make @booking.Car?.Model</td>
+					<td>@booking.Car</td>
 					<td>@booking.StartDate.ToShortDateString()</td>
 					<td>@booking.EndDate.ToShortDateString()</td>
 				</tr>

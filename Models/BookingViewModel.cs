@@ -11,5 +11,10 @@ namespace MVC_Project.Models
         public CustomerViewModel? Customer { get; set; }
         public CarListingViewModel? Car { get; set; }
 
+        public BookingViewModel()
+        {
+            StartDate = DateOnly.FromDateTime(DateTime.Today);
+            EndDate = StartDate.AddDays(14);
+        }
     }
 }

@@ -62,7 +62,7 @@
                 } else {
                     <td>
                         <a asp-controller="CarListings" asp-action="Details" asp-route-id="@item.CarId">Details</a>
-                        <a asp-controller="Bookings" asp-action="Create" asp-route-id="@item.CarId">Book</a>
+                        <a asp-controller="Bookings" asp-action="Create" asp-route-carId="@item.CarId">Book</a>
                 </td>
                 }
             </tr>

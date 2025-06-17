@@ -27,7 +27,6 @@ namespace MVC_Project.Controllers
 
         // GET: Bookings
         //Fetch List of all Bookings
-        //AUTHORIZATION: Only logged in ADMINS should be able to view all bookings
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
@@ -59,18 +58,35 @@ namespace MVC_Project.Controllers
         // GET: Bookings/Create
         //CREATE SHOULD ALWAYS BE CONNECTED TO SPECIFIC CAR LISTING WHEN CLICKING BOOK
         [Authorize]
-        public IActionResult Create()
+        public async Task <IActionResult> Create(int carId)
         {
-            ViewBag.Cars = new SelectList(_context.CarListings, "CarId", "Make", "Model"); 
-            return View();
+            var car = await _context.CarListings.FirstOrDefaultAsync(car => car.CarId == carId);
+            if (car == null)
+            {
+                return NotFound();
+            }
+
+            var email = User.Identity?.Name;
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == email);
+            if (customer == null)
+            {
+                return NotFound("Customer not found.");
+            }
+
+            var bookingViewModel = new BookingViewModel 
+            { 
+                CarId = carId,
+                Car = _mapper.Map<CarListingViewModel>(car),
+                Customer = _mapper.Map<CustomerViewModel>(customer)
+            };
+            return View(bookingViewModel);
         }
 
         // POST: Bookings/Create
-        //Bind CarId and BookingId to the bookingViewModel, CustomerID should already be bound due to log in
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("CarId,BookingId,StartDate,EndDate")] BookingViewModel bookingViewModel)
+        public async Task<IActionResult> Create([Bind("CarId,StartDate,EndDate,CustomerId")] BookingViewModel bookingViewModel)
         {
             //Get currenty logged in user's CustomerID
             var userEmail = User.Identity?.Name;
@@ -91,7 +107,7 @@ namespace MVC_Project.Controllers
                 //map viewmodel to booking domain model
                 var booking = _mapper.Map<Booking>(bookingViewModel);
                 booking.CustomerId = customer.CustomerId;
-                booking.Car = car;
+                //booking.Car = car;
 
                 _context.Add(booking);
                 await _context.SaveChangesAsync();
