@@ -155,17 +155,26 @@ namespace MVC_Project.Areas.Identity.Pages.Account
                     var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
                     var customer = new Customer
                         {
-                        Email = user.Email,
+                        Email = Input.Email,
                         FirstName = Input.FirstName,
                         LastName = Input.LastName,
                         PhoneNumber = 0, //Default is 0, can be updated later
                         UserId = user.Id //Links to Identity
                         };
 
-                        dbContext.Customers.Add(customer);
-                        await dbContext.SaveChangesAsync();
+                        try
+                        {
+                            dbContext.Customers.Add(customer);
+                            await dbContext.SaveChangesAsync();
 
-                        return LocalRedirect(returnUrl);
+                            return LocalRedirect(returnUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            //Test error handling
+                            _logger.LogError(ex, "Failed to create customer profile after registration.");
+                            throw;
+                        }
                     }
 
                     foreach (var error in result.Errors)

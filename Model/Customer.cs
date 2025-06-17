@@ -12,8 +12,6 @@ namespace MVC_Project.Model
         public string LastName { get; set; } = "";
         [Required]
         public string Email { get; set; } = "";
-
-        [MinLength(10, ErrorMessage = "Phone Number must be at least 10 digits")]
         public int PhoneNumber { get; set; }
         public string? UserId { get; set; } //Foreign key to IdentityUser
 
