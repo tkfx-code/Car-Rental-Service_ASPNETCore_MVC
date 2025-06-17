@@ -6,8 +6,8 @@ namespace MVC_Project.Models
     {
         [Key]
         public int CarId { get; set; }
-        public string Make { get; set; } = string.Empty;
-        public string Model { get; set; } = string.Empty;
+        public string? Make { get; set; }
+        public string? Model { get; set; }
         //raw input from create multiline text
         public string PicturesRaw { get; set; }
         //not bound from form but used internally

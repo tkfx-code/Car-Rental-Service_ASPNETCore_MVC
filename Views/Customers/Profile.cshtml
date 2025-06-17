@@ -28,7 +28,8 @@
 		</tr>
 	</table>
 	<a asp-action="Edit" asp-route-id="@Model.Customer.CustomerId">Edit Profile</a>
-	<br />
+	<br/>
+	<br/>
 
 <h3> My Bookings </h3>
 
@@ -45,6 +46,7 @@
 				<th>Car</th>
 				<th>Rented on</th>
 				<th>Due Back</th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -52,9 +54,10 @@
 			{
 				<tr>
 					<td>@booking.BookingId</td>
-					<td>@booking.Car</td>
+					<td>@(booking.Car != null ? $"{booking.Car.Make} {booking.Car.Model}" : "Unknown")</td>
 					<td>@booking.StartDate.ToShortDateString()</td>
 					<td>@booking.EndDate.ToShortDateString()</td>
+					<td><a asp-controller="Bookings" asp-action="Delete" asp-route-id=@booking.BookingId>Delete</a></td>
 				</tr>
 			}
 		</tbody>

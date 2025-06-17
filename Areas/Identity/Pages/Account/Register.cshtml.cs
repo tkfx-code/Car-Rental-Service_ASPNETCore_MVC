@@ -153,13 +153,13 @@ namespace MVC_Project.Areas.Identity.Pages.Account
                     await _signInManager.SignInAsync(user, isPersistent: true);
                         
                     var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
-                    var customer = new Customer
+                        var customer = new Customer
                         {
-                        Email = Input.Email,
-                        FirstName = Input.FirstName,
-                        LastName = Input.LastName,
-                        PhoneNumber = 0, //Default is 0, can be updated later
-                        UserId = user.Id //Links to Identity
+                            Email = Input.Email,
+                            FirstName = Input.FirstName,
+                            LastName = Input.LastName,
+                            PhoneNumber = string.Empty, //Default is 0, can be updated later
+                            UserId = user.Id //Links to Identity
                         };
 
                         try

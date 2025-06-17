@@ -60,8 +60,8 @@
 				{
 					<tr>
 						<td>@booking.BookingId</td>
-						<td>@booking.Car</td>
-						<td>@booking.Customer</td>
+						<td>@(booking.Car != null ? $"{booking.Car.Make} {booking.Car.Model}" : "Unknown")</td>
+						<td>@(booking.Customer != null ? $"{booking.Customer.FirstName} {booking.Customer.LastName}" : "Unknown")</td>
 						<td>@booking.StartDate</td>
 						<td>@booking.EndDate</td>
 						<td>

@@ -73,7 +73,7 @@ namespace MVC_Project.Controllers
             if (User.IsInRole("Admin"))
             {
                 // If the user is an admin, redirect to the admin index
-                return RedirectToAction("Index", "Admin");
+                return RedirectToAction("Admin", "Home");
             }
 
             var customer = await _context.Customers
@@ -222,7 +222,7 @@ namespace MVC_Project.Controllers
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Profile deleted successfully."; // Confirmation message after deletion
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Admin", "Home");
         }
 
         private bool CustomerViewModelExists(int id)

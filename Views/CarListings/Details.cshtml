@@ -10,30 +10,30 @@
     <h4>CarListing</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Make)
         </dt>
-        <td>
-            @Html.DisplayFor(model => model.Make)
-        </td>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Make)
+            </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Model)
         </dt>
-        <td>
-            @Html.DisplayFor(model => model.Model)
-        </td>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Model)
+            </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.isAvailable)
+            Availability
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.isAvailable)
-        </dd>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.isAvailable)
+            </dd>
+
 		@foreach (var picture in Model.Pictures)
 		{
-			<dt class="col-sm-2">
-			</dt>
+            <dt class="col-sm-2"> </dt>
 			<dd class="col-sm-10">
-				<img src="@picture" alt="Car Picture" style="max-width: 200px; max-height: 200px;" />
+				<img src="@picture" alt="Car Picture" style="max-width: 500px; max-height: 500px;" />
 			</dd>
 		}
     </dl>

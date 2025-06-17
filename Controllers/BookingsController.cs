@@ -107,7 +107,7 @@ namespace MVC_Project.Controllers
                 //map viewmodel to booking domain model
                 var booking = _mapper.Map<Booking>(bookingViewModel);
                 booking.CustomerId = customer.CustomerId;
-                //booking.Car = car;
+                booking.Car = car;
 
                 _context.Add(booking);
                 await _context.SaveChangesAsync();
@@ -192,8 +192,6 @@ namespace MVC_Project.Controllers
 
         // GET: Bookings/Delete/5
         // Fetch the Booking to be deleted by BookingID
-        //AUTHORIZATION : Only logged in users should be able to delete bookings OR admins
-        //SHOW CONFIRMATION MESSAGE BEFORE DELETING
         [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -216,7 +214,6 @@ namespace MVC_Project.Controllers
 
         // POST: Bookings/Delete/5
         // Deletes the Booking by BookingID
-        //AUTHORIZATION: Only logged in users should be able to delete bookings OR admins
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -232,7 +229,13 @@ namespace MVC_Project.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Booking deleted successfully."; // Confirmation message after deletion
-            return RedirectToAction(nameof(Index));
+            if (User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Home", "Admin"); //If admin removes booking return to Admin dashboard
+            } else
+            {
+                return RedirectToAction("Profile", "Customers"); //If customer removes their booking return to profile
+            }
         }
 
         private bool BookingExists(int id)

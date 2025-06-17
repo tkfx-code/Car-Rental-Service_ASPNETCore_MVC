@@ -10,7 +10,7 @@ namespace MVC_Project.Data
         {
             CreateMap<CustomerViewModel,Customer>().ReverseMap();
             CreateMap<CarListing, CarListingViewModel>().ReverseMap();
-            CreateMap<Booking, BookingViewModel>().ReverseMap();
+            CreateMap<Booking, BookingViewModel>().ForMember(model=>model.Car,options=>options.MapFrom(booking=>booking.Car)).ReverseMap();
         }
     }
 }
