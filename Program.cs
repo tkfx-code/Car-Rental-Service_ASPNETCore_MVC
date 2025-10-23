@@ -32,15 +32,26 @@ namespace MVC_Project
                 var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                //hardcore admin user for testing purposes
+                //hardcode admin user for testing purposes
                 string adminRole = "Admin";
                 string adminEmail = "admin@example.com";
                 string adminPassword = "Admin@123";
+
+                //hardcode a "superuser"
+                string superUserRole = "SuperUser";
+                string superUserEmail = "superuser@example.com";
+                string superUserPassword = "SuperUser@123";
 
                 //check that user and role exists, create if not
                 if (!await roleManager.RoleExistsAsync(adminRole))
                 {
                     await roleManager.CreateAsync(new IdentityRole(adminRole));
+                }
+
+                //check that superuser role exists, create if not
+                if (!await roleManager.RoleExistsAsync(superUserRole))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(superUserRole));
                 }
 
                 var adminUser = await userManager.FindByEmailAsync(adminEmail);
@@ -56,6 +67,21 @@ namespace MVC_Project
                 else if (!await userManager.IsInRoleAsync(adminUser, adminRole))
                 {
                     await userManager.AddToRoleAsync(adminUser, adminRole);
+                }
+
+                //Logic for SuperUser
+                var superUser = await userManager.FindByEmailAsync(superUserEmail);
+                if (superUser == null)
+                {
+                    superUser = new IdentityUser { UserName = superUserEmail, Email = superUserEmail, EmailConfirmed = true };
+                    var result = await userManager.CreateAsync(superUser, superUserPassword);
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(superUser, superUserRole);
+                    }
+                } else if (!await userManager.IsInRoleAsync(superUser, superUserRole))
+                {
+                    await userManager.AddToRoleAsync(superUser, superUserRole);
                 }
             }
 

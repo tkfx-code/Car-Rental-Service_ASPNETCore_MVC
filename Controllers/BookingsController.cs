@@ -27,7 +27,7 @@ namespace MVC_Project.Controllers
 
         // GET: Bookings
         //Fetch List of all Bookings
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, SuperUser")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Bookings.ToListAsync());
@@ -120,7 +120,7 @@ namespace MVC_Project.Controllers
 
         // GET: Bookings/Edit/5
         // Fetch the Booking to be edited by BookingID
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles ="Admin, SuperUser")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -146,7 +146,7 @@ namespace MVC_Project.Controllers
         //ADD CONFIRMATION MESSAGE
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, SuperUser")]
         public async Task<IActionResult> Edit(int id, [Bind("BookingId,StartDate,EndDate")] BookingViewModel bookingViewModel)
         {
             if (id != bookingViewModel.BookingId)
@@ -229,7 +229,7 @@ namespace MVC_Project.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Booking deleted successfully."; // Confirmation message after deletion
-            if (User.IsInRole("Admin"))
+            if (User.IsInRole("Admin") || User.IsInRole("SuperUser"))
             {
                 return RedirectToAction("Home", "Admin"); //If admin removes booking return to Admin dashboard
             } else

@@ -93,7 +93,7 @@ namespace MVC_Project.Controllers
 
         // GET: CarListings/Edit/5
         //AUTHORIZATION: Only admins should be able to edit car listings
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, SuperUser")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -116,7 +116,7 @@ namespace MVC_Project.Controllers
         //AUTHORIZATION: Only admins should be able to edit car listings
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, SuperUser")]
         public async Task<IActionResult> Edit(int id, [Bind("CarId,Make,Model, PicturesRaw, isAvailable")] CarListingViewModel carListingViewModel)
         {
             if (id != carListingViewModel.CarId)
